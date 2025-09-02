@@ -1,0 +1,40 @@
+name: WaniKani Study Bot
+
+on:
+  schedule:
+    # Times are in UTC. Adjust for your timezone!
+    # For EST: 6am EST = 11am UTC, 6pm EST = 11pm UTC
+    # For PST: 6am PST = 2pm UTC, 6pm PST = 2am UTC
+    # For CST: 6am CST = 12pm UTC, 6pm CST = 12am UTC
+    - cron: '0 11 * * *'  # Morning session (6am EST)
+    - cron: '0 23 * * *'  # Evening session (6pm EST)
+  
+  # Allow manual trigger for testing
+  workflow_dispatch:
+
+jobs:
+  send-study-prompt:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run WaniKani Bot
+      env:
+        WANIKANI_API_KEY: ${{ secrets.WANIKANI_API_KEY }}
+        TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+        TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+        TWILIO_FROM_NUMBER: ${{ secrets.TWILIO_FROM_NUMBER }}
+        YOUR_PHONE_NUMBER: ${{ secrets.YOUR_PHONE_NUMBER }}
+      run: python wanikani_bot.py
