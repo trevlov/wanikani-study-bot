@@ -23,7 +23,16 @@ YOUR_PHONE_NUMBER = os.environ.get('YOUR_PHONE_NUMBER')
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 
 # Initialize OpenAI client
-openai_client = OpenAI(api_key=OPENAI_API_KEY)
+try:
+    if OPENAI_API_KEY:
+        openai_client = OpenAI(api_key=OPENAI_API_KEY)
+    else:
+        print("Warning: OPENAI_API_KEY not found, etymology features will be disabled")
+        openai_client = None
+except Exception as e:
+    print(f"Warning: Could not initialize OpenAI client: {e}")
+    print("Etymology features will be disabled")
+    openai_client = None
 
 # WaniKani API settings
 BASE_URL = "https://api.wanikani.com/v2"
@@ -134,6 +143,10 @@ def create_component_string(component_info):
 
 def get_etymology_from_openai(items_batch):
     """Get etymology insights from OpenAI for a batch of items."""
+    if not openai_client:
+        print("OpenAI client not available, skipping etymology")
+        return {}
+        
     try:
         # Prepare the items for OpenAI
         items_text = []
